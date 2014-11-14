@@ -1,0 +1,15 @@
+language: java
+jdk:
+  - openjdk7
+  - oraclejdk7
+
+before_install:
+ - chmod +x gradlew
+ 
+install: ./gradlew build 
+script:
+   - ./gradlew execJarUpd
+    
+branches:
+  only:
+    - master

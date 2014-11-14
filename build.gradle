@@ -1,0 +1,56 @@
+apply plugin: 'java'
+apply plugin: 'findbugs'
+apply plugin: 'application'
+apply plugin: 'eclipse'
+apply plugin: 'gradle-one-jar'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+         classpath 'com.github.rholder:gradle-one-jar:1.0.4'
+    }
+}
+
+version = "0.0.1"
+group= "pl.grm"
+
+description = 'BoL Launcher Updater'
+archivesBaseName = "BoL-Launcher_Updater"
+mainClassName = 'pl.grm.boll.updater.Updater'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    compile group: 'org.ini4j', name: 'ini4j', version: 'latest.release'
+  	compile 'mysql:mysql-connector-java:5.1.6'
+  	compile files('libs/BoL-Launcher_Lib-0.0.0.jar')
+	testCompile 'junit:junit:4.11'
+}
+
+jar {
+	manifest {
+	attributes "Main-Class": "pl.grm.boll.Launcher"
+	attributes "Class-Path": configurations.compile.collect { it.getName() }.join(' ')
+	}
+}
+
+task execJarUpd(type: OneJar) {
+    mainClass = mainClassName
+    archiveName = archivesBaseName+"-"+version+"-SNAPSHOT.jar"
+}
+
+findbugs {
+  ignoreFailures = true
+  sourceSets = [sourceSets.main]
+  reportsDir = file("$project.buildDir/reports/findbugs")
+  effort = "max"
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.1'
+}
