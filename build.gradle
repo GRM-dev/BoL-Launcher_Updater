@@ -18,7 +18,7 @@ group= "pl.grm"
 
 description = 'BoL Launcher Updater'
 archivesBaseName = "BoL-Launcher_Updater"
-mainClassName = 'pl.grm.boll.updater.Updater'
+mainClassName = 'pl.grm.bol.updater.Updater'
 
 repositories {
     mavenCentral()
@@ -34,7 +34,7 @@ dependencies {
 
 jar {
 	manifest {
-	attributes "Main-Class": "pl.grm.boll.Launcher"
+	attributes "Main-Class": "pl.grm.bol.updater.Updater"
 	attributes "Class-Path": configurations.compile.collect { it.getName() }.join(' ')
 	}
 }

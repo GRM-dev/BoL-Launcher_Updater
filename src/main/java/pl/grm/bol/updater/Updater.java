@@ -49,7 +49,7 @@ public class Updater {
 			dialog = new UpdaterDialog();
 			progressBar = dialog.getProgressBar();
 			progressBar.setValue(5);
-			// killExec("taskkill /pid " + launcherPId);
+			killExec("taskkill /pid " + launcherPId);
 			progressBar.setValue(10);
 			Thread.sleep(4000L);
 		}
@@ -66,7 +66,7 @@ public class Updater {
 		progressBar.setValue(55);
 		madeBackup();
 		progressBar.setValue(60);
-		if (moveNewLauncherFromTemp()) {
+		if (saveNewLauncher()) {
 			progressBar.setValue(68);
 			updateConfig();
 			progressBar.setValue(77);
@@ -97,6 +97,7 @@ public class Updater {
 			logger.addHandler(fHandler);
 			SimpleFormatter formatter = new SimpleFormatter();
 			fHandler.setFormatter(formatter);
+			logger.info("Logger started");
 		}
 		catch (SecurityException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
@@ -107,17 +108,14 @@ public class Updater {
 	}
 	
 	/**
-	 * Credit args to fields
+	 * Assign args to fields
 	 * 
 	 * @param args
 	 * @throws IOException
 	 */
 	private static void assignArgs(String[] args) throws IOException {
 		if (args.length != 3) {
-			jarFileAbsPath = "N:/Kody/BoL-Launcher_Client/build/libs/BoL-Launcher-0.0.1-SNAPSHOT.jar";
-			launcherPId = "0";
-			launcherDirPath = "N:\\Kody\\BoL-Launcher_Client\\build\\libs";
-			// throw new IOException("Bad arguments!");
+			throw new IOException("Bad arguments!");
 		} else {
 			jarFileAbsPath = args[0];
 			launcherPId = args[1];
@@ -179,12 +177,14 @@ public class Updater {
 	 */
 	private static void downloadNewLauncher() {
 		fileName = "BoL-Launcher-" + version + "-SNAPSHOT.jar";
+		logger.info("Downloadin file: " + fileName);
 		try {
 			URL website = new URL(SERVER_LINK + "jenkins/artifacts/" + fileName);
 			ReadableByteChannel rbc = Channels.newChannel(website.openStream());
 			FileOutputStream fos;
 			fos = new FileOutputStream(fileName);
 			fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+			logger.info("New launcher downloaded.");
 			fos.close();
 		}
 		catch (FileNotFoundException e) {
@@ -256,13 +256,13 @@ public class Updater {
 	 * 
 	 * @return
 	 */
-	private static boolean moveNewLauncherFromTemp() {
+	private static boolean saveNewLauncher() {
 		InputStream inStream = null;
 		OutputStream outStream = null;
 		try {
 			File fromFile = new File(BOL_CONF_PATH + fileName);
 			File toFile = new File(launcherDirPath + "\\" + fileName);
-			logger.info("New file: " + launcherDirPath + "\\" + fileName);
+			logger.info("New launcher file: " + launcherDirPath + "\\" + fileName);
 			inStream = new FileInputStream(fromFile);
 			outStream = new FileOutputStream(toFile);
 			
@@ -273,6 +273,7 @@ public class Updater {
 			}
 			inStream.close();
 			outStream.close();
+			logger.info("Deleting temp fles.");
 			fromFile.delete();
 			logger.info("Launcher updated successfully!");
 			return true;
@@ -288,8 +289,8 @@ public class Updater {
 	 */
 	private static void updateConfig() {
 		try {
-			FileOperation.writeConfigParamLauncher(FileOperation.readConfigFile(Updater.class),
-					"version", version);
+			FileOperation.writeConfigParamLauncher(
+					FileOperation.readConfigFile(Updater.class), "version", version);
 		}
 		catch (IOException | IllegalArgumentException | IllegalAccessException
 				| NoSuchFieldException | SecurityException e) {
@@ -302,10 +303,11 @@ public class Updater {
 	 */
 	private static void runLauncher() {
 		String separator = System.getProperty("file.separator");
-		String javaPath = System.getProperty("java.home") + separator + "bin" + separator + "java";
+		String javaPath = System.getProperty("java.home") + separator + "bin" + separator
+				+ "java";
 		File dir = new File(launcherDirPath);
-		ProcessBuilder processBuilder = new ProcessBuilder(javaPath, "-jar", launcherDirPath + "\\"
-				+ fileName);
+		ProcessBuilder processBuilder = new ProcessBuilder(javaPath, "-jar",
+				launcherDirPath + "\\" + fileName);
 		try {
 			processBuilder.directory(dir);
 			processBuilder.start();
