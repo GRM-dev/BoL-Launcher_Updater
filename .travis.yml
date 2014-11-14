@@ -8,7 +8,7 @@ before_install:
  
 install: ./gradlew build 
 script:
-   - ./gradlew execJarUpd
+   - ./gradlew execJar
     
 branches:
   only:

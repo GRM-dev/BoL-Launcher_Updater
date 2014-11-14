@@ -39,7 +39,7 @@ jar {
 	}
 }
 
-task execJarUpd(type: OneJar) {
+task execJar(type: OneJar) {
     mainClass = mainClassName
     archiveName = archivesBaseName+"-"+version+"-SNAPSHOT.jar"
 }

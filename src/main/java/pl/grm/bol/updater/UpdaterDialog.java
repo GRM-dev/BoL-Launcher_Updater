@@ -1,12 +1,12 @@
 package pl.grm.bol.updater;
 
 import java.awt.BorderLayout;
-import java.awt.Container;
 
 import javax.swing.BorderFactory;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.WindowConstants;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
@@ -30,8 +30,9 @@ public class UpdaterDialog extends JDialog {
 		progressBar.setStringPainted(true);
 		Border border = BorderFactory.createTitledBorder("Updating Launcher ...");
 		progressBar.setBorder(border);
-		Container content = getContentPane();
 		setSize(300, 100);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		setVisible(true);
 	}
 	
 	public JProgressBar getProgressBar() {

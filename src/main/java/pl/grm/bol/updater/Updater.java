@@ -18,7 +18,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-import javax.swing.JDialog;
 import javax.swing.JProgressBar;
 
 import org.ini4j.Ini;
@@ -45,13 +44,12 @@ public class Updater {
 	public static void main(String[] args) {
 		setupLogger();
 		try {
+			logger.info("Updater Started");
 			assignArgs(args);
 			dialog = new UpdaterDialog();
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			dialog.setVisible(true);
 			progressBar = dialog.getProgressBar();
 			progressBar.setValue(5);
-			killExec("taskkill /pid " + launcherPId);
+			// killExec("taskkill /pid " + launcherPId);
 			progressBar.setValue(10);
 			Thread.sleep(4000L);
 		}
@@ -115,12 +113,18 @@ public class Updater {
 	 * @throws IOException
 	 */
 	private static void assignArgs(String[] args) throws IOException {
-		if (args.length != 3) { throw new IOException("Bad arguments!"); }
-		jarFileAbsPath = args[0];
-		launcherPId = args[1];
-		launcherDirPath = args[2];
-		if (jarFileAbsPath.contains("/BoL-Launcher_Client/bin/")) { throw new IOException(
-				"You are propably running it from Eclipse!"); }
+		if (args.length != 3) {
+			jarFileAbsPath = "N:/Kody/BoL-Launcher_Client/build/libs/BoL-Launcher-0.0.1-SNAPSHOT.jar";
+			launcherPId = "0";
+			launcherDirPath = "N:\\Kody\\BoL-Launcher_Client\\build\\libs";
+			// throw new IOException("Bad arguments!");
+		} else {
+			jarFileAbsPath = args[0];
+			launcherPId = args[1];
+			launcherDirPath = args[2];
+			if (jarFileAbsPath.contains("/BoL-Launcher_Client/bin/")) { throw new IOException(
+					"You are propably running it from Eclipse!"); }
+		}
 	}
 	
 	/**
@@ -167,6 +171,7 @@ public class Updater {
 			logger.log(Level.SEVERE, e.toString(), e);
 		}
 		version = sIni.get("Launcher", "last_version");
+		logger.info("New version: " + version);
 	}
 	
 	/**
@@ -303,7 +308,7 @@ public class Updater {
 				+ fileName);
 		try {
 			processBuilder.directory(dir);
-			Process process = processBuilder.start();
+			processBuilder.start();
 		}
 		catch (IOException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
