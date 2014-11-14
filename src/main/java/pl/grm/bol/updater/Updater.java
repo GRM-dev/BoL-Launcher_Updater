@@ -18,30 +18,41 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import javax.swing.JDialog;
+import javax.swing.JProgressBar;
+
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
 import pl.grm.boll.lib.FileOperation;
 
 public class Updater {
-	private static final String	APP_DATA			= System.getenv("APPDATA");
-	private static final String	BOL_CONF_PATH		= APP_DATA + "\\BOL\\";
-	private static final String	LOG_FILE_NAME		= "updater.log";
-	private static final String	SERVER_LINK			= "http://grm-dev.pl/";
-	private static final String	SERVER_VERSION_LINK	= SERVER_LINK + "bol/version.ini";
-	private static String		jarFileAbsPath;
-	private static String		version;
-	private static String		fileName;
-	private static String		launcherPId;
-	private static String		launcherDirPath;
-	private static Logger		logger;
-	private static FileHandler	fHandler;
+	private static final String		APP_DATA			= System.getenv("APPDATA");
+	private static final String		BOL_CONF_PATH		= APP_DATA + "\\BOL\\";
+	private static final String		LOG_FILE_NAME		= "updater.log";
+	private static final String		SERVER_LINK			= "http://grm-dev.pl/";
+	private static final String		SERVER_VERSION_LINK	= SERVER_LINK + "bol/version.ini";
+	private static String			jarFileAbsPath;
+	private static String			version;
+	private static String			fileName;
+	private static String			launcherPId;
+	private static String			launcherDirPath;
+	private static Logger			logger;
+	private static FileHandler		fHandler;
+	private static UpdaterDialog	dialog;
+	private static JProgressBar		progressBar;
 	
 	public static void main(String[] args) {
 		setupLogger();
 		try {
 			assignArgs(args);
+			dialog = new UpdaterDialog();
+			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			dialog.setVisible(true);
+			progressBar = dialog.getProgressBar();
+			progressBar.setValue(5);
 			killExec("taskkill /pid " + launcherPId);
+			progressBar.setValue(10);
 			Thread.sleep(4000L);
 		}
 		catch (IOException e) {
@@ -50,16 +61,32 @@ public class Updater {
 		catch (InterruptedException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
 		}
+		progressBar.setValue(20);
 		checkoutServerVersion();
+		progressBar.setValue(30);
 		downloadNewLauncher();
+		progressBar.setValue(55);
 		madeBackup();
+		progressBar.setValue(60);
 		if (moveNewLauncherFromTemp()) {
+			progressBar.setValue(68);
 			updateConfig();
+			progressBar.setValue(77);
 			deleteBackupFile();
+			progressBar.setString("Updated");
 		} else {
+			progressBar.setString("Not updated");
 			restoreBackup();
 		}
+		progressBar.setValue(90);
 		runLauncher();
+		progressBar.setValue(100);
+		try {
+			Thread.sleep(1000L);
+		}
+		catch (InterruptedException e) {
+			logger.log(Level.SEVERE, e.toString(), e);
+		}
 	}
 	
 	/**
@@ -85,7 +112,6 @@ public class Updater {
 	 * Credit args to fields
 	 * 
 	 * @param args
-	 * @return true if successufully assigned.
 	 * @throws IOException
 	 */
 	private static void assignArgs(String[] args) throws IOException {
