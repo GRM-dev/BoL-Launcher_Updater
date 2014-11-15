@@ -1,4 +1,4 @@
-package pl.grm.bol.updater;
+package main.java.pl.grm.bol.updater;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,23 +27,24 @@ import org.ini4j.InvalidFileFormatException;
 import pl.grm.bol.lib.FileOperation;
 
 public class Updater {
-	public static final String		APP_DATA			= System.getenv("APPDATA");
-	public static final String		BOL_CONF_PATH		= APP_DATA + "\\BOL\\";
-	public static final String		LOG_FILE_NAME		= "updater.log";
-	public static final String		SERVER_LINK			= "http://grm-dev.pl/";
-	public static final String		SERVER_VERSION_LINK	= SERVER_LINK + "bol/version.ini";
-	public static final String		CONFIG_FILE_NAME	= "config.ini";
-	private static String			jarFileAbsPath;
-	private static String			version;
-	private static String			fileName;
-	private static String			launcherPId;
-	private static String			launcherDirPath;
-	private static Logger			logger;
-	private static FileHandler		fHandler;
-	private static UpdaterDialog	dialog;
-	private static JProgressBar		progressBar;
-	private static boolean			updated;
-	
+	public static final String APP_DATA = System.getenv("APPDATA");
+	public static final String BOL_CONF_PATH = APP_DATA + "\\BOL\\";
+	public static final String LOG_FILE_NAME = "updater.log";
+	public static final String SERVER_LINK = "http://grm-dev.pl/";
+	public static final String SERVER_VERSION_LINK = SERVER_LINK
+			+ "bol/version.ini";
+	public static final String CONFIG_FILE_NAME = "config.ini";
+	private static String jarFileAbsPath;
+	private static String version;
+	private static String fileName;
+	private static String launcherPId;
+	private static String launcherDirPath;
+	private static Logger logger;
+	private static FileHandler fHandler;
+	private static UpdaterDialog dialog;
+	private static JProgressBar progressBar;
+	private static boolean updated;
+
 	public static void main(String[] args) {
 		setupLogger();
 		try {
@@ -55,11 +56,9 @@ public class Updater {
 			killExec("taskkill /pid " + launcherPId);
 			progressBar.setValue(10);
 			Thread.sleep(4000L);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
-		}
-		catch (InterruptedException e) {
+		} catch (InterruptedException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
 		}
 		progressBar.setValue(20);
@@ -86,8 +85,7 @@ public class Updater {
 		progressBar.setValue(100);
 		try {
 			Thread.sleep(1000L);
-		}
-		catch (InterruptedException e) {
+		} catch (InterruptedException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
 		}
 		String upd = null;
@@ -96,31 +94,30 @@ public class Updater {
 		} else {
 			upd = "Failed";
 		}
-		JOptionPane.showMessageDialog(dialog, "Update" + upd, "Update Finished",
-				JOptionPane.PLAIN_MESSAGE);
+		JOptionPane.showMessageDialog(dialog, "Update" + upd,
+				"Update Finished", JOptionPane.PLAIN_MESSAGE);
 		dialog.dispose();
 	}
-	
+
 	/**
 	 * Configure Logger to log infos & warnings
 	 */
 	private static void setupLogger() {
 		logger = Logger.getLogger(Updater.class.getName());
 		try {
-			fHandler = new FileHandler(BOL_CONF_PATH + LOG_FILE_NAME, 1048476, 1, true);
+			fHandler = new FileHandler(BOL_CONF_PATH + LOG_FILE_NAME, 1048476,
+					1, true);
 			logger.addHandler(fHandler);
 			SimpleFormatter formatter = new SimpleFormatter();
 			fHandler.setFormatter(formatter);
 			logger.info("Logger started");
-		}
-		catch (SecurityException e) {
+		} catch (SecurityException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
 		}
 	}
-	
+
 	/**
 	 * Assign args to fields
 	 * 
@@ -134,11 +131,13 @@ public class Updater {
 			jarFileAbsPath = args[0];
 			launcherPId = args[1];
 			launcherDirPath = args[2];
-			if (jarFileAbsPath.contains("/BoL-Launcher_Client/bin/")) { throw new IOException(
-					"You are propably running it from Eclipse!"); }
+			if (jarFileAbsPath.contains("/BoL-Launcher_Client/bin/")) {
+				throw new IOException(
+						"You are propably running it from Eclipse!");
+			}
 		}
 	}
-	
+
 	/**
 	 * Kills specified process of Launcher
 	 * 
@@ -146,7 +145,8 @@ public class Updater {
 	 * @return list Of Process
 	 * @throws IOException
 	 */
-	private static ArrayList<String> killExec(String processString) throws IOException {
+	private static ArrayList<String> killExec(String processString)
+			throws IOException {
 		String outStr = "";
 		ArrayList<String> processOutList = new ArrayList<String>();
 		int i = -1;
@@ -162,7 +162,7 @@ public class Updater {
 		}
 		return processOutList;
 	}
-	
+
 	/**
 	 * Check version of launcher on the web server.
 	 */
@@ -172,20 +172,17 @@ public class Updater {
 		try {
 			url = new URL(SERVER_VERSION_LINK);
 			sIni.load(url);
-		}
-		catch (MalformedURLException e) {
+		} catch (MalformedURLException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
-		}
-		catch (InvalidFileFormatException e) {
+		} catch (InvalidFileFormatException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
 		}
 		version = sIni.get("Launcher", "last_version");
 		logger.info("New version: " + version);
 	}
-	
+
 	/**
 	 * Downloads new Launcher.
 	 */
@@ -200,23 +197,21 @@ public class Updater {
 			fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 			logger.info("New launcher downloaded.");
 			fos.close();
-		}
-		catch (FileNotFoundException e) {
+		} catch (FileNotFoundException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
-		}
-		catch (MalformedURLException e) {
+		} catch (MalformedURLException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
 		}
 	}
-	
+
 	/**
 	 * change the name of old file by adding '_old'
 	 */
 	private static synchronized void madeBackup() {
-		String fileNameC = jarFileAbsPath.substring(0, jarFileAbsPath.length() - 4);
+		String fileNameC = jarFileAbsPath.substring(0,
+				jarFileAbsPath.length() - 4);
 		File oldFile = new File(jarFileAbsPath);
 		File newFile = new File(fileNameC + "_old.jar");
 		if (!newFile.exists()) {
@@ -229,12 +224,13 @@ public class Updater {
 			logger.info("File Exists");
 		}
 	}
-	
+
 	/**
 	 * Restore backuped file '_old'
 	 */
 	private static void restoreBackup() {
-		String fileNameC = jarFileAbsPath.substring(0, jarFileAbsPath.length() - 4);
+		String fileNameC = jarFileAbsPath.substring(0,
+				jarFileAbsPath.length() - 4);
 		fileNameC = fileNameC.concat("_old.jar");
 		File oldFile = new File(fileNameC);
 		File newFile = new File(jarFileAbsPath);
@@ -248,7 +244,7 @@ public class Updater {
 			logger.info("File Exists");
 		}
 	}
-	
+
 	/**
 	 * replace old Launcher with new one
 	 * 
@@ -260,10 +256,11 @@ public class Updater {
 		try {
 			File fromFile = new File(BOL_CONF_PATH + fileName);
 			File toFile = new File(launcherDirPath + "\\" + fileName);
-			logger.info("New launcher file: " + launcherDirPath + "\\" + fileName);
+			logger.info("New launcher file: " + launcherDirPath + "\\"
+					+ fileName);
 			inStream = new FileInputStream(fromFile);
 			outStream = new FileOutputStream(toFile);
-			
+
 			byte[] buffer = new byte[1024];
 			int length;
 			while ((length = inStream.read(buffer)) > 0) {
@@ -275,58 +272,57 @@ public class Updater {
 			fromFile.delete();
 			logger.info("Launcher updated successfully!");
 			return true;
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
 		}
 		return false;
 	}
-	
+
 	/**
 	 * delete (with '_old') file
 	 */
 	private static void deleteBackupFile() {
-		String fileNameC = jarFileAbsPath.substring(0, jarFileAbsPath.length() - 4);
+		String fileNameC = jarFileAbsPath.substring(0,
+				jarFileAbsPath.length() - 4);
 		File file = new File(fileNameC + "_old.jar");
 		file.delete();
 		try {
 			File file2 = new File(FileOperation.getCurrentJar(Updater.class));
 			file2.deleteOnExit();
-		}
-		catch (UnsupportedEncodingException e) {
+		} catch (UnsupportedEncodingException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
 		}
 	}
-	
+
 	/**
 	 * Update config ini with launcher param version
 	 */
 	private static void updateConfig() {
 		try {
 			FileOperation.writeConfigParamLauncher(
-					FileOperation.readConfigFile(Updater.class), "version", version);
-		}
-		catch (IOException | IllegalArgumentException | IllegalAccessException
-				| NoSuchFieldException | SecurityException e) {
+					FileOperation.readConfigFile(Updater.class), "version",
+					version);
+		} catch (IOException | IllegalArgumentException
+				| IllegalAccessException | NoSuchFieldException
+				| SecurityException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
 		}
 	}
-	
+
 	/**
 	 * Runs the Launcher
 	 */
 	private static void runLauncher() {
 		String separator = System.getProperty("file.separator");
-		String javaPath = System.getProperty("java.home") + separator + "bin" + separator
-				+ "java";
+		String javaPath = System.getProperty("java.home") + separator + "bin"
+				+ separator + "java";
 		File dir = new File(launcherDirPath);
 		ProcessBuilder processBuilder = new ProcessBuilder(javaPath, "-jar",
 				launcherDirPath + "\\" + fileName);
 		try {
 			processBuilder.directory(dir);
 			processBuilder.start();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
 		}
 	}
