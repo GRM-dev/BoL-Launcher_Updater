@@ -1,6 +1,8 @@
 package pl.grm.bol.updater;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 
 import javax.swing.BorderFactory;
 import javax.swing.JDialog;
@@ -20,7 +22,7 @@ public class UpdaterDialog extends JDialog {
 	 */
 	public UpdaterDialog() {
 		setTitle("BoL Launcher Updater");
-		setBounds(100, 100, 450, 300);
+		setPreferredSize(setupBounds());
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -34,6 +36,23 @@ public class UpdaterDialog extends JDialog {
 		setSize(300, 100);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setVisible(true);
+	}
+	
+	/**
+	 * Calculates frame's dimensions
+	 * 
+	 * @return {@link Dimension} (x,y)
+	 */
+	private Dimension setupBounds() {
+		Dimension dim;
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int screenHeight = (int) screenSize.getHeight();
+		int screenWidth = (int) screenSize.getWidth();
+		int frameWidth = screenWidth / 2 - screenWidth / 20;
+		int frameHeight = frameWidth * 3 / 4;
+		setBounds(2 * screenWidth / 5, 5 * screenHeight / 11, 200, 200);
+		dim = new Dimension(frameWidth, frameHeight);
+		return dim;
 	}
 	
 	public JProgressBar getProgressBar() {

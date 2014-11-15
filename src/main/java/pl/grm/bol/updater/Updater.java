@@ -18,19 +18,21 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
-import pl.grm.boll.lib.FileOperation;
+import pl.grm.bol.lib.FileOperation;
 
 public class Updater {
-	private static final String		APP_DATA			= System.getenv("APPDATA");
-	private static final String		BOL_CONF_PATH		= APP_DATA + "\\BOL\\";
-	private static final String		LOG_FILE_NAME		= "updater.log";
-	private static final String		SERVER_LINK			= "http://grm-dev.pl/";
-	private static final String		SERVER_VERSION_LINK	= SERVER_LINK + "bol/version.ini";
+	public static final String		APP_DATA			= System.getenv("APPDATA");
+	public static final String		BOL_CONF_PATH		= APP_DATA + "\\BOL\\";
+	public static final String		LOG_FILE_NAME		= "updater.log";
+	public static final String		SERVER_LINK			= "http://grm-dev.pl/";
+	public static final String		SERVER_VERSION_LINK	= SERVER_LINK + "bol/version.ini";
+	public static final String		CONFIG_FILE_NAME	= "config.ini";
 	private static String			jarFileAbsPath;
 	private static String			version;
 	private static String			fileName;
@@ -40,6 +42,7 @@ public class Updater {
 	private static FileHandler		fHandler;
 	private static UpdaterDialog	dialog;
 	private static JProgressBar		progressBar;
+	private static boolean			updated;
 	
 	public static void main(String[] args) {
 		setupLogger();
@@ -72,9 +75,11 @@ public class Updater {
 			progressBar.setValue(77);
 			deleteBackupFile();
 			progressBar.setString("Updated");
+			updated = true;
 		} else {
 			progressBar.setString("Not updated");
 			restoreBackup();
+			updated = false;
 		}
 		progressBar.setValue(90);
 		runLauncher();
@@ -85,6 +90,15 @@ public class Updater {
 		catch (InterruptedException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
 		}
+		String upd = null;
+		if (updated) {
+			upd = "Success";
+		} else {
+			upd = "Failed";
+		}
+		JOptionPane.showMessageDialog(dialog, "Update" + upd, "Update Finished",
+				JOptionPane.PLAIN_MESSAGE);
+		dialog.dispose();
 	}
 	
 	/**
@@ -182,7 +196,7 @@ public class Updater {
 			URL website = new URL(SERVER_LINK + "jenkins/artifacts/" + fileName);
 			ReadableByteChannel rbc = Channels.newChannel(website.openStream());
 			FileOutputStream fos;
-			fos = new FileOutputStream(fileName);
+			fos = new FileOutputStream(BOL_CONF_PATH + fileName);
 			fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 			logger.info("New launcher downloaded.");
 			fos.close();
@@ -236,22 +250,6 @@ public class Updater {
 	}
 	
 	/**
-	 * delete (with '_old') file
-	 */
-	private static void deleteBackupFile() {
-		String fileNameC = jarFileAbsPath.substring(0, jarFileAbsPath.length() - 4);
-		File file = new File(fileNameC + "_old.jar");
-		file.delete();
-		try {
-			File file2 = new File(FileOperation.getCurrentJar(Updater.class));
-			file2.deleteOnExit();
-		}
-		catch (UnsupportedEncodingException e) {
-			logger.log(Level.SEVERE, e.toString(), e);
-		}
-	}
-	
-	/**
 	 * replace old Launcher with new one
 	 * 
 	 * @return
@@ -282,6 +280,22 @@ public class Updater {
 			logger.log(Level.SEVERE, e.toString(), e);
 		}
 		return false;
+	}
+	
+	/**
+	 * delete (with '_old') file
+	 */
+	private static void deleteBackupFile() {
+		String fileNameC = jarFileAbsPath.substring(0, jarFileAbsPath.length() - 4);
+		File file = new File(fileNameC + "_old.jar");
+		file.delete();
+		try {
+			File file2 = new File(FileOperation.getCurrentJar(Updater.class));
+			file2.deleteOnExit();
+		}
+		catch (UnsupportedEncodingException e) {
+			logger.log(Level.SEVERE, e.toString(), e);
+		}
 	}
 	
 	/**

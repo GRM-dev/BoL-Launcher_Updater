@@ -16,7 +16,7 @@ buildscript {
 version = "0.0.1"
 group= "pl.grm"
 
-description = 'BoL Launcher Updater'
+description = 'BoL Launcher Client Updater'
 archivesBaseName = "BoL-Launcher_Updater"
 mainClassName = 'pl.grm.bol.updater.Updater'
 
