@@ -1,4 +1,4 @@
-package main.java.pl.grm.bol.updater;
+package pl.grm.bol.updater;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -13,10 +13,10 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
 public class UpdaterDialog extends JDialog {
-	private static final long serialVersionUID = 1L;
-	private final JPanel contentPanel = new JPanel();
-	private JProgressBar progressBar;
-
+	private static final long	serialVersionUID	= 1L;
+	private final JPanel		contentPanel		= new JPanel();
+	private JProgressBar		progressBar;
+	
 	/**
 	 * Create the dialog.
 	 */
@@ -31,14 +31,13 @@ public class UpdaterDialog extends JDialog {
 		contentPanel.add(progressBar, BorderLayout.NORTH);
 		progressBar.setValue(0);
 		progressBar.setStringPainted(true);
-		Border border = BorderFactory
-				.createTitledBorder("Updating Launcher ...");
+		Border border = BorderFactory.createTitledBorder("Updating Launcher ...");
 		progressBar.setBorder(border);
 		setSize(300, 100);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setVisible(true);
 	}
-
+	
 	/**
 	 * Calculates frame's dimensions
 	 * 
@@ -55,7 +54,7 @@ public class UpdaterDialog extends JDialog {
 		dim = new Dimension(frameWidth, frameHeight);
 		return dim;
 	}
-
+	
 	public JProgressBar getProgressBar() {
 		return progressBar;
 	}
