@@ -13,10 +13,7 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -24,28 +21,24 @@ import javax.swing.JProgressBar;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
+import pl.grm.bol.lib.BLog;
+import pl.grm.bol.lib.Config;
 import pl.grm.bol.lib.FileOperation;
 
 public class Updater {
-	public static final String		APP_DATA			= System.getenv("APPDATA");
-	public static final String		BOL_CONF_PATH		= APP_DATA + "\\BOL\\";
-	public static final String		LOG_FILE_NAME		= "updater.log";
-	public static final String		SERVER_LINK			= "http://grm-dev.pl/";
-	public static final String		SERVER_VERSION_LINK	= SERVER_LINK + "bol/version.ini";
-	public static final String		CONFIG_FILE_NAME	= "config.ini";
+	public static final String		LOG_FILE_NAME	= "updater.log";
 	private static String			jarFileAbsPath;
 	private static String			version;
 	private static String			fileName;
 	private static String			launcherPId;
 	private static String			launcherDirPath;
-	private static Logger			logger;
-	private static FileHandler		fHandler;
+	private static BLog				logger;
 	private static UpdaterDialog	dialog;
 	private static JProgressBar		progressBar;
 	private static boolean			updated;
 	
 	public static void main(String[] args) {
-		setupLogger();
+		logger = new BLog(LOG_FILE_NAME);
 		try {
 			logger.info("Updater Started");
 			assignArgs(args);
@@ -102,41 +95,18 @@ public class Updater {
 	}
 	
 	/**
-	 * Configure Logger to log infos & warnings
-	 */
-	private static void setupLogger() {
-		logger = Logger.getLogger(Updater.class.getName());
-		try {
-			fHandler = new FileHandler(BOL_CONF_PATH + LOG_FILE_NAME, 1048476, 1, true);
-			logger.addHandler(fHandler);
-			SimpleFormatter formatter = new SimpleFormatter();
-			fHandler.setFormatter(formatter);
-			logger.info("Logger started");
-		}
-		catch (SecurityException e) {
-			logger.log(Level.SEVERE, e.toString(), e);
-		}
-		catch (IOException e) {
-			logger.log(Level.SEVERE, e.toString(), e);
-		}
-	}
-	
-	/**
 	 * Assign args to fields
 	 * 
 	 * @param args
 	 * @throws IOException
 	 */
 	private static void assignArgs(String[] args) throws IOException {
-		if (args.length != 3) {
-			throw new IOException("Bad arguments!");
-		} else {
-			jarFileAbsPath = args[0];
-			launcherPId = args[1];
-			launcherDirPath = args[2];
-			if (jarFileAbsPath.contains("/BoL-Launcher_Client/bin/")) { throw new IOException(
-					"You are propably running it from Eclipse!"); }
-		}
+		if (args.length != 3) { throw new IOException("Bad arguments!"); }
+		jarFileAbsPath = args[0];
+		launcherPId = args[1];
+		launcherDirPath = args[2];
+		if (jarFileAbsPath.contains("/BoL-Launcher_Client/bin/")) { throw new IOException(
+				"You are propably running it from Eclipse!"); }
 	}
 	
 	/**
@@ -170,7 +140,7 @@ public class Updater {
 		Ini sIni = new Ini();
 		URL url;
 		try {
-			url = new URL(SERVER_VERSION_LINK);
+			url = new URL(Config.SERVER_VERSION_LINK);
 			sIni.load(url);
 		}
 		catch (MalformedURLException e) {
@@ -193,10 +163,10 @@ public class Updater {
 		fileName = "BoL-Launcher-" + version + "-SNAPSHOT.jar";
 		logger.info("Downloadin file: " + fileName);
 		try {
-			URL website = new URL(SERVER_LINK + "jenkins/artifacts/" + fileName);
+			URL website = new URL(Config.SERVER_LINK + "jenkins/artifacts/" + fileName);
 			ReadableByteChannel rbc = Channels.newChannel(website.openStream());
 			FileOutputStream fos;
-			fos = new FileOutputStream(BOL_CONF_PATH + fileName);
+			fos = new FileOutputStream(Config.BOL_CONF_PATH + fileName);
 			fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 			logger.info("New launcher downloaded.");
 			fos.close();
@@ -258,7 +228,7 @@ public class Updater {
 		InputStream inStream = null;
 		OutputStream outStream = null;
 		try {
-			File fromFile = new File(BOL_CONF_PATH + fileName);
+			File fromFile = new File(Config.BOL_CONF_PATH + fileName);
 			File toFile = new File(launcherDirPath + "\\" + fileName);
 			logger.info("New launcher file: " + launcherDirPath + "\\" + fileName);
 			inStream = new FileInputStream(fromFile);
@@ -303,11 +273,10 @@ public class Updater {
 	 */
 	private static void updateConfig() {
 		try {
-			FileOperation.writeConfigParamLauncher(
-					FileOperation.readConfigFile(Updater.class), "version", version);
+			FileOperation.writeConfigParamLauncher(FileOperation.readConfigFile(Updater.class),
+					"version", version);
 		}
-		catch (IOException | IllegalArgumentException | IllegalAccessException
-				| NoSuchFieldException | SecurityException e) {
+		catch (IOException | IllegalArgumentException | SecurityException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
 		}
 	}
@@ -317,11 +286,10 @@ public class Updater {
 	 */
 	private static void runLauncher() {
 		String separator = System.getProperty("file.separator");
-		String javaPath = System.getProperty("java.home") + separator + "bin" + separator
-				+ "java";
+		String javaPath = System.getProperty("java.home") + separator + "bin" + separator + "java";
 		File dir = new File(launcherDirPath);
-		ProcessBuilder processBuilder = new ProcessBuilder(javaPath, "-jar",
-				launcherDirPath + "\\" + fileName);
+		ProcessBuilder processBuilder = new ProcessBuilder(javaPath, "-jar", launcherDirPath + "\\"
+				+ fileName);
 		try {
 			processBuilder.directory(dir);
 			processBuilder.start();
