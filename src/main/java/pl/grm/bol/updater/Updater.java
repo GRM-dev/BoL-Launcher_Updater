@@ -163,10 +163,10 @@ public class Updater {
 		fileName = "BoL-Launcher-" + version + "-SNAPSHOT.jar";
 		logger.info("Downloadin file: " + fileName);
 		try {
-			URL website = new URL(Config.SERVER_LINK + "jenkins/artifacts/" + fileName);
+			URL website = new URL(Config.SERVER_SITE_LINK + "jenkins/artifacts/" + fileName);
 			ReadableByteChannel rbc = Channels.newChannel(website.openStream());
 			FileOutputStream fos;
-			fos = new FileOutputStream(Config.BOL_CONF_PATH + fileName);
+			fos = new FileOutputStream(Config.BOL_MAIN_PATH + fileName);
 			fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 			logger.info("New launcher downloaded.");
 			fos.close();
@@ -228,7 +228,7 @@ public class Updater {
 		InputStream inStream = null;
 		OutputStream outStream = null;
 		try {
-			File fromFile = new File(Config.BOL_CONF_PATH + fileName);
+			File fromFile = new File(Config.BOL_MAIN_PATH + fileName);
 			File toFile = new File(launcherDirPath + "\\" + fileName);
 			logger.info("New launcher file: " + launcherDirPath + "\\" + fileName);
 			inStream = new FileInputStream(fromFile);
@@ -260,7 +260,7 @@ public class Updater {
 		File file = new File(fileNameC + "_old.jar");
 		file.delete();
 		try {
-			File file2 = new File(FileOperation.getCurrentJar(Updater.class));
+			File file2 = new File(FileOperation.getCurrentJarPath(Updater.class));
 			file2.deleteOnExit();
 		}
 		catch (UnsupportedEncodingException e) {
@@ -273,7 +273,7 @@ public class Updater {
 	 */
 	private static void updateConfig() {
 		try {
-			FileOperation.writeConfigParamLauncher(FileOperation.readConfigFile(Updater.class),
+			FileOperation.writeConfigParamLauncher(FileOperation.readConfigFile(version),
 					"version", version);
 		}
 		catch (IOException | IllegalArgumentException | SecurityException e) {
