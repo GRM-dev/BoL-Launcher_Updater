@@ -24,6 +24,7 @@ import org.ini4j.InvalidFileFormatException;
 import pl.grm.bol.lib.BLog;
 import pl.grm.bol.lib.Config;
 import pl.grm.bol.lib.FileOperation;
+import pl.grm.bol.lib.MD5HashChecksum;
 
 public class Updater {
 	public static final String		LOG_FILE_NAME	= "updater.log";
@@ -58,7 +59,9 @@ public class Updater {
 		progressBar.setValue(20);
 		checkoutServerVersion();
 		progressBar.setValue(30);
-		downloadNewLauncher();
+		if (!correctFileExists()) {
+			downloadNewLauncher();
+		}
 		progressBar.setValue(55);
 		madeBackup();
 		progressBar.setValue(60);
@@ -154,13 +157,31 @@ public class Updater {
 		}
 		version = sIni.get("Launcher", "last_version");
 		logger.info("New version: " + version);
+		fileName = "BoL-Launcher-" + version + "-SNAPSHOT.jar";
+	}
+	
+	/**
+	 * If file exists than check checksum
+	 * 
+	 * @return true if correct file already exists on computer
+	 */
+	private static boolean correctFileExists() {
+		File file = new File(Config.BOL_MAIN_PATH + fileName);
+		if (file.exists()) {
+			try {
+				return MD5HashChecksum.isFileCorrect(new File(fileName));
+			}
+			catch (IOException e) {
+				logger.log(Level.SEVERE, e.toString(), e);
+			}
+		}
+		return false;
 	}
 	
 	/**
 	 * Downloads new Launcher.
 	 */
 	private static void downloadNewLauncher() {
-		fileName = "BoL-Launcher-" + version + "-SNAPSHOT.jar";
 		logger.info("Downloadin file: " + fileName);
 		try {
 			URL website = new URL(Config.SERVER_SITE_LINK + "jenkins/artifacts/" + fileName);
