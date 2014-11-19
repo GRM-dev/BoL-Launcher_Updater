@@ -13,7 +13,7 @@ buildscript {
     }
 }
 
-version = "0.0.2"
+version = "0.0.3"
 group= "pl.grm"
 
 description = 'BoL Launcher Client Updater'
@@ -28,7 +28,7 @@ repositories {
 dependencies {
     compile group: 'org.ini4j', name: 'ini4j', version: 'latest.release'
   	compile 'mysql:mysql-connector-java:5.1.6'
-  	compile files('libs/BoL-Launcher_Lib-0.0.0.jar')
+  	compile files('libs/BoL-Launcher_Lib-0.0.0.jar', 'libs/EffectProgressBar.jar')
 	testCompile 'junit:junit:4.11'
 }
 

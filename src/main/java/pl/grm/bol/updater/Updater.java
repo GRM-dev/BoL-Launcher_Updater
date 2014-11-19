@@ -29,7 +29,7 @@ import pl.grm.bol.lib.MD5HashChecksum;
 public class Updater {
 	public static final String		LOG_FILE_NAME	= "updater.log";
 	private static String			jarFileAbsPath;
-	private static String			version;
+	private static String			sVersion;
 	private static String			fileName;
 	private static String			launcherPId;
 	private static String			launcherDirPath;
@@ -37,8 +37,10 @@ public class Updater {
 	private static UpdaterDialog	dialog;
 	private static JProgressBar		progressBar;
 	private static boolean			updated;
+	private static boolean			updateInProgress;
 	
 	public static void main(String[] args) {
+		setUpdateInProgress(true);
 		logger = new BLog(LOG_FILE_NAME);
 		try {
 			logger.info("Updater Started");
@@ -72,7 +74,9 @@ public class Updater {
 			deleteBackupFile();
 			progressBar.setString("Updated");
 			updated = true;
+			setUpdateInProgress(false);
 		} else {
+			progressBar.setValue(0);
 			progressBar.setString("Not updated");
 			restoreBackup();
 			updated = false;
@@ -95,6 +99,7 @@ public class Updater {
 		JOptionPane.showMessageDialog(dialog, "Update" + upd, "Update Finished",
 				JOptionPane.PLAIN_MESSAGE);
 		dialog.dispose();
+		System.exit(0);
 	}
 	
 	/**
@@ -155,9 +160,9 @@ public class Updater {
 		catch (IOException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
 		}
-		version = sIni.get("Launcher", "last_version");
-		logger.info("New version: " + version);
-		fileName = "BoL-Launcher-" + version + "-SNAPSHOT.jar";
+		sVersion = sIni.get("Launcher", "last_version");
+		logger.info("New version: " + sVersion);
+		fileName = "BoL-Launcher-" + sVersion + "-SNAPSHOT.jar";
 	}
 	
 	/**
@@ -294,8 +299,8 @@ public class Updater {
 	 */
 	private static void updateConfig() {
 		try {
-			FileOperation.writeConfigParamLauncher(FileOperation.readConfigFile(version),
-					"version", version);
+			FileOperation.writeConfigParamLauncher(FileOperation.readConfigFile(sVersion),
+					"version", sVersion);
 		}
 		catch (IOException | IllegalArgumentException | SecurityException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
@@ -318,5 +323,13 @@ public class Updater {
 		catch (IOException e) {
 			logger.log(Level.SEVERE, e.toString(), e);
 		}
+	}
+	
+	public static boolean isUpdateInProgress() {
+		return updateInProgress;
+	}
+	
+	private static void setUpdateInProgress(boolean updateInProgress) {
+		Updater.updateInProgress = updateInProgress;
 	}
 }

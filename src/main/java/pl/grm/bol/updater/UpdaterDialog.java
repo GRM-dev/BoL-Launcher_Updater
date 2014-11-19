@@ -1,41 +1,69 @@
 package pl.grm.bol.updater;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Toolkit;
 
 import javax.swing.BorderFactory;
-import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.WindowConstants;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 
-public class UpdaterDialog extends JDialog {
+import Effect.BarConstant;
+import Effect.EffectProgressBarCoord;
+import Effect.EffectProgressBarUI;
+
+public class UpdaterDialog extends JFrame {
 	private static final long	serialVersionUID	= 1L;
 	private final JPanel		contentPanel		= new JPanel();
 	private JProgressBar		progressBar;
+	private EffectProgressBarUI	barUI;
+	private Color[]				colors				= {
+			Color.BLUE, Color.CYAN, Color.GRAY, Color.MAGENTA, Color.ORANGE, Color.PINK, Color.RED,
+			Color.YELLOW							};
 	
 	/**
 	 * Create the dialog.
 	 */
 	public UpdaterDialog() {
-		setTitle("BoL Launcher Updater");
+		super("BoL Launcher Updater");
 		setPreferredSize(setupBounds());
 		getContentPane().setLayout(new BorderLayout());
-		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BorderLayout(0, 0));
+		createProgressBar();
+		contentPanel.add(progressBar, BorderLayout.CENTER);
+		setSize(400, 100);
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		setResizable(false);
+		setVisible(true);
+	}
+	
+	private void createProgressBar() {
 		progressBar = new JProgressBar();
-		contentPanel.add(progressBar, BorderLayout.NORTH);
+		barUI = new EffectProgressBarUI(progressBar);
+		barUI.setRoundCorner(EffectProgressBarCoord.RoundOVAL);
+		barUI.setDarkLightColors(colors);
+		barUI.setBorder(1);
+		barUI.setBorderColor(Color.GRAY);
+		barUI.setHighQuality(true);
+		barUI.setShadowPainted(true);
+		barUI.setSelectionBackground(Color.RED);
+		barUI.setSelectionForeground(Color.YELLOW);
+		barUI.setIllusionDirection(BarConstant.LEFT_TO_RIGHT);
+		barUI.getGradientFactory().setGrad(45);
+		progressBar.setUI(barUI);
+		progressBar.setForeground(Color.RED);
+		progressBar.setFont(new Font("Arial", Font.BOLD, 20));
 		progressBar.setValue(0);
 		progressBar.setStringPainted(true);
-		Border border = BorderFactory.createTitledBorder("Updating Launcher ...");
-		progressBar.setBorder(border);
-		setSize(300, 100);
-		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		setVisible(true);
+		progressBar.setBackground(Color.BLACK);
+		progressBar.setBorder(BorderFactory.createEtchedBorder(Color.WHITE, Color.CYAN));
 	}
 	
 	/**
@@ -57,5 +85,9 @@ public class UpdaterDialog extends JDialog {
 	
 	public JProgressBar getProgressBar() {
 		return progressBar;
+	}
+	
+	public static void main(String[] args) {
+		UpdaterDialog dia = new UpdaterDialog();
 	}
 }
