@@ -25,19 +25,21 @@ import pl.grm.bol.lib.BLog;
 import pl.grm.bol.lib.Config;
 import pl.grm.bol.lib.FileOperation;
 import pl.grm.bol.lib.MD5HashChecksum;
+import pl.grm.bol.lib.TypeOfProject;
+import pl.grm.bol.lib.net.UpdateFrame;
 
-public class Updater {
-	public static final String		LOG_FILE_NAME	= "updater.log";
-	private static String			jarFileAbsPath;
-	private static String			sVersion;
-	private static String			fileName;
-	private static String			launcherPId;
-	private static String			launcherDirPath;
-	private static BLog				logger;
-	private static UpdaterDialog	dialog;
-	private static JProgressBar		progressBar;
-	private static boolean			updated;
-	private static boolean			updateInProgress;
+public class UpdaterLauncher {
+	public static final String	LOG_FILE_NAME	= "updater.log";
+	private static String		launcherJarAbsPath;
+	private static String		sVersion;
+	private static String		fileName;
+	private static String		launcherPId;
+	private static String		launcherDirPath;
+	private static BLog			logger;
+	private static UpdateFrame	updateDialog;
+	private static JProgressBar	progressBar;
+	private static boolean		updated;
+	private static boolean		updateInProgress;
 	
 	public static void main(String[] args) {
 		setUpdateInProgress(true);
@@ -45,8 +47,8 @@ public class Updater {
 		try {
 			logger.info("Updater Started");
 			assignArgs(args);
-			dialog = new UpdaterDialog();
-			progressBar = dialog.getProgressBar();
+			updateDialog = new UpdateFrame("Launcher update", TypeOfProject.UPDATER);
+			progressBar = updateDialog.getProgressBar();
 			progressBar.setValue(5);
 			killExec("taskkill /pid " + launcherPId);
 			progressBar.setValue(10);
@@ -96,9 +98,9 @@ public class Updater {
 		} else {
 			upd = "Failed";
 		}
-		JOptionPane.showMessageDialog(dialog, "Update" + upd, "Update Finished",
+		JOptionPane.showMessageDialog(updateDialog, "Update" + upd, "Update Finished",
 				JOptionPane.PLAIN_MESSAGE);
-		dialog.dispose();
+		updateDialog.dispose();
 		System.exit(0);
 	}
 	
@@ -110,25 +112,25 @@ public class Updater {
 	 */
 	private static void assignArgs(String[] args) throws IOException {
 		if (args.length != 3) { throw new IOException("Bad arguments!"); }
-		jarFileAbsPath = args[0];
+		launcherJarAbsPath = args[0];
 		launcherPId = args[1];
 		launcherDirPath = args[2];
-		if (jarFileAbsPath.contains("/BoL-Launcher_Client/bin/")) { throw new IOException(
+		if (launcherJarAbsPath.contains("/BoL-Launcher_Client/bin/")) { throw new IOException(
 				"You are propably running it from Eclipse!"); }
 	}
 	
 	/**
 	 * Kills specified process of Launcher
 	 * 
-	 * @param processString
+	 * @param processStringPID
 	 * @return list Of Process
 	 * @throws IOException
 	 */
-	private static ArrayList<String> killExec(String processString) throws IOException {
+	private static ArrayList<String> killExec(String processStringPID) throws IOException {
 		String outStr = "";
 		ArrayList<String> processOutList = new ArrayList<String>();
 		int i = -1;
-		Process p = Runtime.getRuntime().exec(processString);
+		Process p = Runtime.getRuntime().exec(processStringPID);
 		InputStream in = p.getInputStream();
 		x11 : while ((i = in.read()) != -1) {
 			if ((char) i == '\n') {
@@ -212,8 +214,8 @@ public class Updater {
 	 * change the name of old file by adding '_old'
 	 */
 	private static synchronized void madeBackup() {
-		String fileNameC = jarFileAbsPath.substring(0, jarFileAbsPath.length() - 4);
-		File oldFile = new File(jarFileAbsPath);
+		String fileNameC = launcherJarAbsPath.substring(0, launcherJarAbsPath.length() - 4);
+		File oldFile = new File(launcherJarAbsPath);
 		File newFile = new File(fileNameC + "_old.jar");
 		if (!newFile.exists()) {
 			if (oldFile.renameTo(newFile)) {
@@ -230,10 +232,10 @@ public class Updater {
 	 * Restore backuped file '_old'
 	 */
 	private static void restoreBackup() {
-		String fileNameC = jarFileAbsPath.substring(0, jarFileAbsPath.length() - 4);
+		String fileNameC = launcherJarAbsPath.substring(0, launcherJarAbsPath.length() - 4);
 		fileNameC = fileNameC.concat("_old.jar");
 		File oldFile = new File(fileNameC);
-		File newFile = new File(jarFileAbsPath);
+		File newFile = new File(launcherJarAbsPath);
 		if (!newFile.exists()) {
 			if (oldFile.renameTo(newFile)) {
 				logger.info("Backup restored!");
@@ -282,11 +284,11 @@ public class Updater {
 	 * delete (with '_old') file
 	 */
 	private static void deleteBackupFile() {
-		String fileNameC = jarFileAbsPath.substring(0, jarFileAbsPath.length() - 4);
+		String fileNameC = launcherJarAbsPath.substring(0, launcherJarAbsPath.length() - 4);
 		File file = new File(fileNameC + "_old.jar");
 		file.delete();
 		try {
-			File file2 = new File(FileOperation.getCurrentJarPath(Updater.class));
+			File file2 = new File(FileOperation.getCurrentJarPath(UpdaterLauncher.class));
 			file2.deleteOnExit();
 		}
 		catch (UnsupportedEncodingException e) {
@@ -330,6 +332,6 @@ public class Updater {
 	}
 	
 	private static void setUpdateInProgress(boolean updateInProgress) {
-		Updater.updateInProgress = updateInProgress;
+		UpdaterLauncher.updateInProgress = updateInProgress;
 	}
 }
