@@ -19,7 +19,7 @@ import pl.grm.bol.lib.TypeOfProject;
 import pl.grm.bol.lib.net.UpdateFrame;
 
 public class LauncherUpdater {
-	public static final String	LOG_FILE_NAME	= "l_updater.log";
+	public static final String	LOG_FILE_NAME	= "launcher_updater.log";
 	private static String		launcherJarAbsPath;
 	private static String		sVersion;
 	private static String		launcherPId;
@@ -46,6 +46,7 @@ public class LauncherUpdater {
 			updateDialog = new UpdateFrame("Launcher update", TypeOfProject.UPDATER, logger);
 			killExec("taskkill /pid " + launcherPId);
 			Thread.sleep(4000L);
+			updateDialog.setVisible(true);
 			updateDialog.getButtonUpdate().setEnabled(true);
 			updateDialog.setUpdaterObj(LauncherUpdater.class);
 		}
@@ -58,7 +59,7 @@ public class LauncherUpdater {
 	 * Method invoked after downloading Launcher file
 	 */
 	public static void saveUpdatedLauncher(String sVersion) {
-		logger.info("aaaaaaaaaaaaaaaaaaa");
+		logger.info("Saving new file");
 		logger.info(launcherDirPath);
 		LauncherUpdater.sVersion = sVersion;
 		madeBackup();
@@ -80,6 +81,7 @@ public class LauncherUpdater {
 		}
 		JOptionPane.showMessageDialog(updateDialog, "Update" + updated, "Update Finished",
 				JOptionPane.PLAIN_MESSAGE);
+		logger.info("Update " + updated);
 		updateDialog.dispose();
 	}
 	
@@ -152,10 +154,11 @@ public class LauncherUpdater {
 	private static boolean saveNewLauncher() {
 		InputStream inStream = null;
 		OutputStream outStream = null;
+		String fileName = "BoL-Launcher-" + sVersion + Config.RELEASE_TYPE;
 		try {
-			File fromFile = new File(Config.BOL_MAIN_PATH + sVersion);
-			File toFile = new File(launcherDirPath + "\\" + sVersion);
-			logger.info("New launcher file: " + launcherDirPath + "\\" + sVersion);
+			File fromFile = new File(Config.BOL_MAIN_PATH + fileName);
+			File toFile = new File(launcherDirPath + "\\" + fileName);
+			logger.info("New launcher file: " + launcherDirPath + "\\" + fileName);
 			inStream = new FileInputStream(fromFile);
 			outStream = new FileOutputStream(toFile);
 			
@@ -183,6 +186,7 @@ public class LauncherUpdater {
 	private static void deleteBackupFile() {
 		String fileNameC = launcherJarAbsPath.substring(0, launcherJarAbsPath.length() - 4);
 		File file = new File(fileNameC + "_old.jar");
+		logger.info("Deleting backup");
 		file.delete();
 		try {
 			File file2 = new File(FileOperation.getCurrentJarPath(LauncherUpdater.class));
@@ -211,6 +215,7 @@ public class LauncherUpdater {
 	 */
 	private static void runLauncher() {
 		File dir = new File(launcherDirPath);
+		logger.info("Starting new launcher");
 		ProcessBuilder processBuilder = new ProcessBuilder(Config.JAVA_PATH, "-jar",
 				launcherDirPath + "\\" + sVersion);
 		try {
