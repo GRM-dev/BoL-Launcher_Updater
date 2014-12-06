@@ -28,7 +28,7 @@ repositories {
 dependencies {
     compile group: 'org.ini4j', name: 'ini4j', version: 'latest.release'
   	compile 'mysql:mysql-connector-java:5.1.6'
-  	compile files('libs/BoL-Launcher_Lib-0.0.1.jar', 'libs/EffectProgressBar.jar')
+  	compile files('libs/BoL-Launcher_Lib-0.0.2.jar', 'libs/EffectProgressBar.jar')
 	testCompile 'junit:junit:4.11'
 }
 
